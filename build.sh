@@ -119,6 +119,8 @@ build_mac_slice() {
     target_cpu=\"$cpu\"
     is_debug=false
     is_component_build=false
+    use_custom_libcxx=false
+    rtc_enable_symbol_export=true
     mac_deployment_target=\"$MACOS_DEPLOYMENT_TARGET\"
     $(printf '%s\n' "${GN_ARGS[@]}")
   "

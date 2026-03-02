@@ -10,8 +10,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "WebRTC",
-            url: "https://github.com/perplexityai/webRTC/releases/download/141.1.0/WebRTC.xcframework.zip",
-            checksum: "0b160625873be281aa170f1c84013f4c40c01fa40d38f61b79309f0105eb050c"
+            url: "https://github.com/perplexityai/webRTC/releases/download/141.2.0/WebRTC.xcframework.zip",
+            checksum: "e1f64eef6f52b9ba4bb21444e6dacf3eb79dc5166ff3afe0207f43213209288d"
         ),
     ]
 )
