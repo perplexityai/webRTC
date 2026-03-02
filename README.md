@@ -42,12 +42,18 @@ Note: VP8/VP9 (libvpx) headers are still compiled for build graph compatibility 
 ## Installation (SPM)
 
 ```swift
-.package(url: "https://github.com/perplexityai/webRTC.git", exact: "141.0.0-audio-only")
+.package(url: "https://github.com/perplexityai/webRTC.git", exact: "141.1.0")
 ```
 
 ## Building From Source
 
-Requires [depot_tools](https://chromium.googlesource.com/chromium/tools/depot_tools.git) on your `PATH`. Takes 30-60 minutes.
+Requires `gn` and `ninja` on your `PATH`. Takes 30-60 minutes.
+
+If you have [depot_tools](https://chromium.googlesource.com/chromium/tools/depot_tools.git), add them to your PATH. Otherwise, after the first fetch you can use the bundled tools from the checkout:
+
+```bash
+export PATH="$PWD/webrtc_build/src/buildtools/mac:$PWD/webrtc_build/src/third_party/ninja:$PATH"
+```
 
 ```bash
 # Full build: fetch source, build iOS + macOS, package xcframework
@@ -63,3 +69,11 @@ Requires [depot_tools](https://chromium.googlesource.com/chromium/tools/depot_to
 The script fetches M141 (`branch-heads/7151`), builds iOS slices (arm64 device + arm64/x64 simulator), builds macOS slices (arm64 + x86_64), assembles the xcframework, and prints the SPM checksum.
 
 See `build.sh` for all the GN args and details.
+
+### Troubleshooting
+
+**`vpython3` / `python3_bin_reldir.txt` errors**: The script sets `VPYTHON_BYPASS` automatically to use system Python instead of depot_tools' managed Python. If you still see issues, ensure system `python3` is available.
+
+**iOS build fails at license generation**: The `generate_licenses.py` step may fail with a JSON parse error after the xcframework is already built. This is non-critical — the xcframework at `out_ios_libs/WebRTC.xcframework` is valid. You can build macOS separately with `--skip-fetch --skip-ios` and then assemble manually.
+
+**macOS codesign "bundle format is ambiguous"**: The build script automatically fixes Chromium's flat framework output into Apple's required versioned bundle structure (symlinks into `Versions/Current/`). This was the root cause of macOS signing failures in earlier builds.

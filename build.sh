@@ -58,10 +58,17 @@ GN_ARGS=(
 
 # -- Preflight -----------------------------------------------------------
 
+# Bypass depot_tools' managed vpython3 wrapper, which may be broken if
+# python3_bin_reldir.txt is missing. System python3 works fine for gn/ninja.
+export VPYTHON_BYPASS="manually managed python not supported by chrome operations"
+
 if ! command -v gn &>/dev/null; then
   echo "Error: 'gn' not found. Add depot_tools to your PATH."
   echo "  git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git"
   echo "  export PATH=\"\$PWD/depot_tools:\$PATH\""
+  echo ""
+  echo "  Alternatively, if you have an existing WebRTC checkout, use the bundled tools:"
+  echo "  export PATH=\"\$PWD/webrtc_build/src/buildtools/mac:\$PWD/webrtc_build/src/third_party/ninja:\$PATH\""
   exit 1
 fi
 
@@ -126,10 +133,12 @@ if [ "$SKIP_MACOS" = false ]; then
   rm -rf out/mac_fat
   mkdir -p out/mac_fat
   cp -R out/mac_arm64/WebRTC.framework out/mac_fat/WebRTC.framework
+  # The macOS framework uses a versioned bundle structure where the binary
+  # lives at Versions/A/WebRTC (not at the top level like iOS).
   lipo -create \
-    out/mac_arm64/WebRTC.framework/WebRTC \
-    out/mac_x64/WebRTC.framework/WebRTC \
-    -output out/mac_fat/WebRTC.framework/WebRTC
+    out/mac_arm64/WebRTC.framework/Versions/A/WebRTC \
+    out/mac_x64/WebRTC.framework/Versions/A/WebRTC \
+    -output out/mac_fat/WebRTC.framework/Versions/A/WebRTC
 
   # Fix macOS versioned bundle structure.
   # Chromium's build outputs a flat framework (all files at top level), but macOS
