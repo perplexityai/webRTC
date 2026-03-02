@@ -131,6 +131,24 @@ if [ "$SKIP_MACOS" = false ]; then
     out/mac_x64/WebRTC.framework/WebRTC \
     -output out/mac_fat/WebRTC.framework/WebRTC
 
+  # Fix macOS versioned bundle structure.
+  # Chromium's build outputs a flat framework (all files at top level), but macOS
+  # requires versioned bundles with symlinks. Without this, codesign fails with
+  # "bundle format is ambiguous" and the app can't be signed.
+  echo "==> Fixing macOS framework bundle structure..."
+  MAC_FW="out/mac_fat/WebRTC.framework"
+
+  # Replace top-level real files/dirs with symlinks into Versions/Current/
+  for item in WebRTC Headers Modules Resources; do
+    if [ -e "$MAC_FW/$item" ] && [ ! -L "$MAC_FW/$item" ]; then
+      rm -rf "$MAC_FW/$item"
+      ln -s "Versions/Current/$item" "$MAC_FW/$item"
+    fi
+  done
+
+  # Ad-hoc sign the framework so Xcode can re-sign it during CodeSignOnCopy
+  codesign --force --sign - "$MAC_FW"
+
   echo "==> macOS build complete: out/mac_fat/WebRTC.framework"
 fi
 
